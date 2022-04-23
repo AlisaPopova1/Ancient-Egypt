@@ -1,0 +1,13 @@
+const actorMigrations = await game.actors.contents.map((actor) => {
+  try {
+    return this.updateActor(actor);
+  } catch (err) {
+    throw new Error(`${actor.name} had a migration error: ${err.message}`);    
+  }
+});
+const values = await Promise.allSettled(actorMigrations);
+for (const value of values.filter((v) => v.status !== "fulfilled")) {
+  LOGGER.error(`Migration error: ${value.reason.message}`);
+  LOGGER.error(value.reason.stack);
+  return false;
+} 
